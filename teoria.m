@@ -13,7 +13,7 @@ porcentaje_impulso = 0.5;
 
 % graficas
 grafica_tiempo = 1;
-grafica_frecuencia = 1;
+grafica_frecuencia = 0;
 
 senal = sin(2*pi*hz*t);
 
@@ -168,30 +168,47 @@ e_b414 = B414*B414';
 e_b415 = B415*B415';
 e_b416 = B416*B416';
 
+BR41 = B41*1;
+BR42 = B42*1;
+BR43 = B43*1;
+BR44 = B44*1;
+BR45 = B45*1;
+BR46 = B46*1;
+BR47 = B47*1;
+BR48 = B48*1;
+BR49 = B49*1;
+BR410 = B410*1;
+BR411 = B411*1;
+BR412 = B412*1;
+BR413 = B413*1;
+BR414 = B414*1;
+BR415 = B415*1;
+BR416 = B416*1;
+
 %% RECONSTRUCCION
 
 % nivel 3
-B31 = rwwt(B41, B42, f0, f1);
-B32 = rwwt(B43, B44, f0, f1);
-B33 = rwwt(B45, B46, f0, f1);
-B34 = rwwt(B47, B48, f0, f1);
-B35 = rwwt(B49, B410, f0, f1);
-B36 = rwwt(B411, B412, f0, f1);
-B37 = rwwt(B413, B414, f0, f1);
-B38 = rwwt(B415, B416, f0, f1);
+[BR31] = rwwt(BR41,BR42,f0,f1);
+[BR32] = rwwt(BR43,BR44,f0,f1);
+[BR33] = rwwt(BR45,BR46,f0,f1);
+[BR34] = rwwt(BR47,BR48,f0,f1);
+[BR35] = rwwt(BR49,BR410,f0,f1);
+[BR36] = rwwt(BR411,BR412,f0,f1);
+[BR37] = rwwt(BR413,BR414,f0,f1);
+[BR38] = rwwt(BR415,BR416,f0,f1);
 
 % nivel 2
-B21 = rwwt(B31, B32, f0, f1);
-B22 = rwwt(B33, B34, f0, f1);
-B23 = rwwt(B35, B36, f0, f1);
-B24 = rwwt(B37, B38, f0, f1);
+[BR21] = rwwt(BR31,BR32,f0,f1);
+[BR22] = rwwt(BR33,BR34,f0,f1);
+[BR23] = rwwt(BR35,BR36,f0,f1);
+[BR24] = rwwt(BR37,BR38,f0,f1);
 
 % nivel 1
-B11 = rwwt(B21, B22, f0, f1);
-B12 = rwwt(B23, B24, f0, f1);
+[BR11] = rwwt(BR21,BR22,f0,f1);
+[BR12] = rwwt(BR23,BR24,f0,f1);
 
 % senal reconstruida
-senal_reconstruida = rwwt(B11, B12, f0, f1);
+senal_reconstruida = rwwt(BR11, BR12, f0, f1);
 [X_recontruida, frec_recontruida] = freqz(senal_reconstruida, 1, 16384, fs);
 
 %% HALLAR IMPULSOS
@@ -206,6 +223,11 @@ for i=1:length(indexp)
     disp("Impulso: " + indexp(i) + " seg.")
 end
 
+
+derivada = senal_energy(1:end-1);
+derivada = [0 derivada];
+resta = senal_energy - derivada;
+resta = resta.*resta;
 %% GRAFICAS EN EL TIEMPO
 % grafica de la señal sin ruido
 if(grafica_tiempo == 1)
@@ -237,7 +259,7 @@ title('Señal con ruido y impulsos')
 % grafica de la señal recontruida
 figure
 subplot(2,1,1);
-plot(t, senal_reconstruida-senal_ruido_impulso')
+plot(t, senal_reconstruida)
 grid on, xlabel('Tiempo'), ylabel('Señal'),
 title('Señal recontruida')
 
@@ -247,6 +269,11 @@ stem(t, senal_energy)
 grid on, xlabel('Tiempo'), ylabel('Señal'),
 title('Energia de la señal')
 
+% grafica de la derivada
+figure
+stem(t, resta)
+grid on, xlabel('Tiempo'), ylabel('Señal'),
+title('Gráfica de la derivada')
 end
 
 %% GRAFICAS EN FRECUENCIA
