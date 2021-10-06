@@ -1,56 +1,34 @@
 close all, clear all, clc
 
-%% GENERACION DE LA SENOIDAL
+%% CARGAR ARCHIVO
+
+senal = load("Grupo6_senal_uno.mat").senal;
 
 % variables
 fs = 8000; % frecuencia de muestreo
-r = 16; % bits/muestra
-duracion = 5; % duracion de la señal
-hz = 1234; % hz de la senoidal
-snr = 30; % SNR con respecto al ruido
+duracion = length(senal)/fs; % duracion de la señal
 t = (0:1/fs:duracion-1/fs)'; % vector de tiempo
-porcentaje_impulso = 0.5;
 
 % graficas
 grafica_tiempo = 1;
 grafica_frecuencia = 0;
-
-senal = sin(2*pi*hz*t);
-
-% añadir ruido
-senal_ruido = awgn(senal, snr);
-
-% añadir 5 impulsos
-a = 0; b = fs*duracion;
-r = randi([a b],1,5);
-impulso = senal*0;
-for i = 1:length(r)
-    impulso(r(i)) = 1;
-    impulso(r(i)+1) = -1;
-end
-senal_ruido_impulso = senal_ruido + impulso;
 
 %% TRANSFORMADAS
 
 % transformada senoidal
 [X_senal, frec_senal] = freqz(senal, 1, 16384, fs);
 
-% transformada senoidal con ruido
-[X_senal_ruido, frec_senal_ruido] = freqz(senal_ruido, 1, 16384, fs);
-
-% transformada de la señal con impulsos
-[X_senal_ruido_impulso, frec_senal_ruido_impulso] = freqz(senal_ruido_impulso, 1, 16384, fs);
 
 %% HALLAR MAXIMA FRECUENCIA
 
-[max_frec, index_max_frec] = max(abs(X_senal_ruido_impulso));
-sinef = round(frec_senal_ruido_impulso(index_max_frec));
+[max_frec, index_max_frec] = max(abs(X_senal));
+sinef = round(frec_senal(index_max_frec));
 disp("La frecuencia de la senoidal es: " + sinef + " Hz.");
 
 %% ARBOL DE DESCOMPOSICION
 
 [h0,h1,f0,f1] = wfilters('db25');
-[B11,B12] = dwwt(senal_ruido_impulso', h0, h1);
+[B11,B12] = dwwt(senal, h0, h1);
 
 % nivel 2
 [B21,B22] = dwwt(B11, h0, h1);
@@ -99,52 +77,52 @@ energy_max = max(lista_e);
 
 switch energy_max
     case e_b41
-        B41 = B41*0.01;
+        B41 = B41*0;
         disp("Banda B41 en 0");
     case e_b42
-        B42 = B41;
+        B42 = B41*0;
         disp("Banda B42 en 0");
     case e_b43
-        B43 = B43*0.01;
+        B43 = B43*0;
         disp("Banda B43 en 0");
     case e_b44
-        B44 = B44*0.01;
+        B44 = B44*0;
         disp("Banda B44 en 0");
     case e_b45
-        B45 = B45*0.01;
+        B45 = B45*0;
         disp("Banda B45 en 0");
     case e_b46
-        B46 = B46*0.01;
+        B46 = B46*0;
         disp("Banda B46 en 0");
     case e_b47
-        B47 = B47*0.01;
+        B47 = B47*0;
         disp("Banda B47 en 0");
     case e_b48
-        B48 = B48*0.01;
+        B48 = B48*0;
         disp("Banda B48 en 0");
     case e_b49
-        B49 = B49*0.01;
+        B49 = B49*0;
         disp("Banda B49 en 0");
     case e_b410
-        B410 = B410*0.01;
+        B410 = B410*0;
         disp("Banda B410 en 0");
     case e_b411
-        B411 = B411*0.01;
+        B411 = B411*0;
         disp("Banda B411 en 0");
     case e_b412
-        B412 = B412*0.01;
+        B412 = B412*0;
         disp("Banda B412 en 0");
     case e_b413
-        B413 = B413*0.01;
+        B413 = B413*0;
         disp("Banda B413 en 0");
     case e_b414
-        B414 = B414*0.01;
+        B414 = B414*0;
         disp("Banda B414 en 0");
     case e_b415
-        B415 = B415*0.01;
+        B415 = B415*0;
         disp("Banda B415 en 0");
     case e_b416
-        B416 = B416*0.01;
+        B416 = B416*0;
         disp("Banda B416 en 0");
     otherwise
         disp('Banda no encontrada')
@@ -211,111 +189,30 @@ BR416 = B416*1;
 senal_reconstruida = rwwt(BR11, BR12, f0, f1);
 [X_recontruida, frec_recontruida] = freqz(senal_reconstruida, 1, 16384, fs);
 
-%% HALLAR IMPULSOS
-
-senal_energy =  senal_reconstruida.*senal_reconstruida;
-max_impulse = max(senal_energy);
-[valuep, indexp]= find(senal_energy > max_impulse*porcentaje_impulso);
-indexp = indexp * 1/fs;
-
-disp("Se encontraron: " + length(indexp) + " impulsos.");
-for i=1:length(indexp)
-    disp("Impulso: " + indexp(i) + " seg.")
-end
-
-
-derivada = senal_reconstruida(1:end-1);
-derivada = [0 derivada];
-resta = senal_energy - derivada;
-resta = resta.*resta;
-%% GRAFICAS EN EL TIEMPO
-% grafica de la señal sin ruido
-if(grafica_tiempo == 1)
-
-figure
-subplot(4,1,1);
-plot(t, senal, 'b')
-grid on, xlabel('Tiempo'), ylabel('Señal'),
-title('Señal senoidal')
-
-% grafica de la señal con ruido
-subplot(4,1,2);
-plot(t, senal_ruido, 'b')
-grid on, xlabel('Tiempo'), ylabel('Señal'),
-title('Señal con ruido')
-
-% grafica de los impulsos
-subplot(4,1,3);
-stem(t, impulso, 'g')
-grid on, xlabel('Tiempo'), ylabel('Señal'),
-title('Impulsos')
-
-% grafica de la señal con impulsos y ruido
-subplot(4,1,4);
-plot(t, senal_ruido_impulso, 'g')
-grid on, xlabel('Tiempo'), ylabel('Señal'),
-title('Señal con ruido y impulsos')
-
-% grafica de la señal recontruida
-figure
-subplot(2,1,1);
-plot(t, senal_reconstruida)
-grid on, xlabel('Tiempo'), ylabel('Señal'),
-title('Señal recontruida')
-
-% grafica de la energia de la señal recontruida
-subplot(2,1,2);
-stem(t, senal_energy)
-grid on, xlabel('Tiempo'), ylabel('Señal'),
-title('Energia de la señal')
-
-% grafica de la derivada
+%% GRAFICAS
 figure
 subplot(2,1,1)
-stem(t, resta)
-grid on, xlabel('Tiempo'), ylabel('Señal'),
-title('Gráfica de la derivada')
-
-subplot(2,1,2);
-stem(t, impulso, 'g')
-grid on, xlabel('Tiempo'), ylabel('Señal'),
-title('Señal con ruido y impulsos')
-end
-
-%% GRAFICAS EN FRECUENCIA
-
-if(grafica_frecuencia == 1)
-figure
-subplot(4,1,1);
 plot(frec_senal, abs(X_senal)),
 grid on,
 xlabel('Frecuencia'),
 ylabel('Modulo'),
 title('[SENOIDAL] Espectro de modulo')
 
-
-subplot(4,1,2);
-plot(frec_senal_ruido, abs(X_senal_ruido)),
-grid on,
-xlabel('Frecuencia'),
-ylabel('Modulo'),
-title('[SENOIDAL c/ RUIDO] Espectro de modulo')
-
-
-subplot(4,1,3);
-plot(frec_senal_ruido_impulso, abs(X_senal_ruido_impulso)),
-grid on,
-xlabel('Frecuencia'),
-ylabel('Modulo'),
-title('[SEÑAL c/ RUIDO + IMPULSOS] Espectro de modulo')
-
-
-subplot(4,1,4);
+subplot(2,1,2)
 plot(frec_recontruida, abs(X_recontruida)),
 grid on,
 xlabel('Frecuencia'),
 ylabel('Modulo'),
 title('[SEÑAL RECONSTRUIDA] Espectro de modulo')
 
-end
 
+figure
+subplot(2,1,1);
+plot(t, senal, 'b')
+grid on, xlabel('Tiempo'), ylabel('Señal'),
+title('Señal senoidal')
+
+subplot(2,1,2);
+stem(t, senal_reconstruida)
+grid on, xlabel('Tiempo'), ylabel('Señal'),
+title('Señal recontruida')
