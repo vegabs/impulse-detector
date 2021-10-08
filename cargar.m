@@ -202,7 +202,7 @@ error = (senal - senal_senoidal).^2;
 media_error = mean(error);
 % stem(t, error);
 % plot(t,senal,t,senal_senoidal);
-[valuep, indexp]= find(error > media_error * 60);
+[valuep, indexp]= find(error > media_error * 30);
 
 disp("Se encontraron: " + length(indexp) + " impulsos.");
 for i=1:length(indexp)
