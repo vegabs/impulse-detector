@@ -211,6 +211,7 @@ BR416 = B416*1;
 senal_reconstruida = rwwt(BR11, BR12, f0, f1);
 [X_recontruida, frec_recontruida] = freqz(senal_reconstruida, 1, 16384, fs);
 
+
 %% HALLAR IMPULSOS
 
 senal_energy =  senal_reconstruida.*senal_reconstruida;
@@ -224,10 +225,11 @@ for i=1:length(indexp)
 end
 
 
-derivada = senal_reconstruida(1:end-1);
-derivada = [0 derivada];
-resta = senal_energy - derivada;
-resta = resta.*resta;
+senal_reconstruida_shift = circshift(senal_reconstruida,1);
+resta = senal_reconstruida - senal_reconstruida_shift;
+[c,lags] = xcorr(senal_reconstruida,senal_reconstruida_shift');
+stem(lags,c)
+%%resta = resta.*resta;
 %% GRAFICAS EN EL TIEMPO
 % grafica de la señal sin ruido
 if(grafica_tiempo == 1)

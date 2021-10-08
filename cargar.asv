@@ -2,7 +2,7 @@ close all, clear all, clc
 
 %% CARGAR ARCHIVO
 
-senal = load("Grupo6_senal_tres.mat").senal;
+senal = load("Grupo6_senal_uno.mat").senal;
 
 % variables
 fs = 8000; % frecuencia de muestreo
@@ -53,22 +53,22 @@ disp("La frecuencia de la senoidal es: " + sinef + " Hz.");
 [B415,B416] = dwwt(B38, h0, h1); 
 
 % energia de las señales
-e_b41 = B41*B41';
-e_b42 = B42*B42';
-e_b43 = B43*B43';
-e_b44 = B44*B44';
-e_b45 = B45*B45';
-e_b46 = B46*B46';
-e_b47 = B47*B47';
-e_b48 = B48*B48';
-e_b49 = B49*B49';
-e_b410 = B410*B410';
-e_b411 = B411*B411';
-e_b412 = B412*B412';
-e_b413 = B413*B413';
-e_b414 = B414*B414';
-e_b415 = B415*B415';
-e_b416 = B416*B416';
+e_b41 = B41*B41'
+e_b42 = B42*B42'
+e_b43 = B43*B43'
+e_b44 = B44*B44'
+e_b45 = B45*B45'
+e_b46 = B46*B46'
+e_b47 = B47*B47'
+e_b48 = B48*B48'
+e_b49 = B49*B49'
+e_b410 = B410*B410'
+e_b411 = B411*B411'
+e_b412 = B412*B412'
+e_b413 = B413*B413'
+e_b414 = B414*B414'
+e_b415 = B415*B415'
+e_b416 = B416*B416'
 
 lista_e = [e_b41 e_b42 e_b43 e_b44 ...
                   e_b45 e_b46 e_b47 e_b48 ...
@@ -80,7 +80,7 @@ energy_max = max(lista_e);
 switch energy_max
     case e_b41
         B41 = B41*0;
-        % B42 = B42*0;
+        B42 = B42*0;
         disp("Banda B41 en 0");
     case e_b42
         B42 = B41*0;
@@ -199,16 +199,8 @@ senal_senoidal = senal - senal_reconstruida;
 %% HALLAR IMPULSOS
 
 error = (senal - senal_senoidal).^2;
-media_error = mean(error);
-% stem(t, error);
-% plot(t,senal,t,senal_senoidal);
-[valuep, indexp]= find(error > media_error * 60);
-
-disp("Se encontraron: " + length(indexp) + " impulsos.");
-for i=1:length(indexp)
-    disp("Impulso en muestra: " + indexp(i))
-end
-
+media_error = mean(err);
+stem(t, error);
 %% GRAFICAS
 
 % frecuencia
@@ -236,25 +228,17 @@ title('[SEÑAL SENOIDAL] Espectro de modulo')
 
 % tiempo
 figure
-subplot(4,1,1);
+subplot(3,1,1);
 plot(t, senal, 'b')
 grid on, xlabel('Tiempo'), ylabel('Señal'),
 title('Señal ingresada')
 
-subplot(4,1,2);
+subplot(3,1,2);
 stem(t, senal_reconstruida)
 grid on, xlabel('Tiempo'), ylabel('Señal'),
 title('Señal recontruida')
 
-subplot(4,1,3);
+subplot(3,1,3);
 plot(t, senal_senoidal)
 grid on, xlabel('Tiempo'), ylabel('Señal'),
 title('Señal senoidal')
-
-subplot(4,1,4);
-hold on
-stem(t, senal, 'b', '.');
-stem(t(indexp), senal(indexp), 'r');
-grid on, xlabel('Tiempo'), ylabel('Señal'),
-title('Impulsos detectados')
-
